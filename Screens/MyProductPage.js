@@ -1,10 +1,11 @@
-import React from 'react';
-import { Text, View, StyleSheet, Button, FlatList, Platform } from 'react-native';
+import React, { useEffect, useState, useCallback } from 'react';
+import { Text, View, StyleSheet, Button, FlatList, Platform , ActivityIndicator} from 'react-native';
 
 
 import { useDispatch, useSelector } from 'react-redux';
 import colors from '../colors/colors'
 import ProductItem from '../components/shop/ProductItem';
+import * as productsActions from '../store/actions/products'
 import * as cartActions from '../store/actions/cart';
 import { Item, HeaderButtons } from 'react-navigation-header-buttons';
 import HeaderButton from '../UI/HeaderButtons';
@@ -17,6 +18,46 @@ import HeaderButton from '../UI/HeaderButtons';
 const MyProductsPage = (props) => {
   const products  = useSelector(state => state.products.availableProducts);
   const dispatch = useDispatch();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isRefreshing, setIsRefreshing ] = useState(false);
+  const[error, setError] = useState();
+
+
+  const loadProducts = useCallback(async () => {
+    setError(null);
+    setIsRefreshing(true);
+    try{
+    await dispatch(productsActions.fetchProducts());
+    } catch(error){
+      setError(eror.message)
+
+    }
+    setIsRefreshing(false);
+  }, [dispatch, setIsLoading, setError]);
+
+
+  useEffect(() => {
+    setIsLoading(true);
+    loadProducts().then(() => {
+      setIsLoading(false);
+    });
+  }, [dispatch, loadProducts]);
+
+  useEffect(() => {
+    const willFocusSub = props.navigation.addListener('willFocus', () => {
+      loadProducts();
+
+    });
+    return( ) => {
+      willFocusSub.remove();
+    };
+  }, [loadProducts]); 
+
+
+
+
+
+
 
   const selectItemHandler = (id, title) => {
     props.navigation.navigate('Item',{
@@ -25,13 +66,34 @@ const MyProductsPage = (props) => {
     
     });
 
+  };
+
+  if(error){
+    return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+    <Text>An Error Has Occurred{error}</Text>
+    </View> 
+
   }
+  if(isLoading){  
+   return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+     <ActivityIndicator size='large' color={colors.pink} />
+     </View> 
+  }
+  if(!isLoading && products.length === 0){  
+    return <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+      <Text>Sellers can add products in the admin tab</Text>
+      </View> 
+   }
 
     return(
         
         <View>
-            <Text>Manage your Products here.</Text>
-            <FlatList keyExtractor={item => item.id} data={products} renderItem={itemData => (<ProductItem
+            
+            <FlatList
+            onRefresh={loadProducts} 
+            refreshing={isRefreshing}
+            keyExtractor={item => item.id} 
+            data={products} renderItem={itemData => (<ProductItem
             image={itemData.item.imageURL}
             title={itemData.item.title}
             price={itemData.item.price}

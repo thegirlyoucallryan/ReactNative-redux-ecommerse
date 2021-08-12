@@ -1,5 +1,5 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, {useEffect} from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 
 
 
@@ -8,10 +8,20 @@ import HeaderButton from '../../UI/HeaderButtons'
 import { HeaderButtons, Item } from 'react-navigation-header-buttons';
 import OrderItem from './OrderItem';
 import colors from '../../colors/colors';
+import * as orderActions from '../../store/actions/orders';
+
 
 
 const OrdersScreen = props => {
-    const orders = useSelector(state =>  state.orders.orders)
+    const orders = useSelector(state =>  state.orders.orders);
+
+    const dispatch = useDispatch();
+
+
+    useEffect(() => {
+      dispatch(orderActions.fetchOrders());
+
+    }, [dispatch])
 
     if(orders.length === 0){
       return(
@@ -43,7 +53,7 @@ const OrdersScreen = props => {
 OrdersScreen.navigationOptions = navData => {
   return {
     headerTitle: 'Your Orders', 
-    headerLeft: (
+    headerLeft: () =>  (
         <HeaderButtons HeaderButtonComponent={HeaderButton}>
             <Item
             title="Menu"

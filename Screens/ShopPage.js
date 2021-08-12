@@ -33,12 +33,15 @@ const ShopPage = (props) => {
 
     return(
     
-            <FlatList keyExtractor={item => item.id} data={userProducts} renderItem={itemData => (
-            <ProductItem
-            image={itemData.item.imageURL}
-            title={itemData.item.title}
-            price={itemData.item.price}
-            onSelect={() => {}}
+            <FlatList
+             keyExtractor={item => item.id} 
+             data={userProducts} 
+             renderItem={itemData => (
+              <ProductItem
+              image={itemData.item.imageURL}
+              title={itemData.item.title}
+              price={itemData.item.price}
+                onSelect={() => {EditorHandler(itemData.item.id)}}
             
             >
                   <Button color={colors.grey} title='Edit' onPress={()=> {EditorHandler(itemData.item.id)}}/>

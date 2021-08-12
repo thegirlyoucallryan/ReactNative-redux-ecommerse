@@ -1,6 +1,6 @@
 import PRODUCTS from "../../data/DummyData";
 import Product from "../../models/product";
-import { CREATE_PRODUCT, DELETE_PRODUCT, UPDATE_PRODUCT } from "../actions/products";
+import { CREATE_PRODUCT, DELETE_PRODUCT, SET_PRODUCTS, UPDATE_PRODUCT } from "../actions/products";
 
 
 const initialState = {
@@ -11,13 +11,25 @@ const initialState = {
 export default (state = initialState, action, ImageURL = 'http://www.tiptoncommunications.com/components/com_easyblog/themes/wireframe/images/placeholder-image.png') => {
     switch (action.type) {
         case CREATE_PRODUCT:
-            const newProd= new Product(new Date().toString(), 'u1', action.productData.title, 
-            action.productData.imageUrl, action.productData.description, action.productData.price );
+            const newProd= new Product(
+                new Date().toString(),
+            action.productData.id,
+            action.productData.title,
+            action.productData.imageUrl, 
+            action.productData.description, 
+            action.productData.price );
             return {
                 ...state,
                 userProducts: state.availableProducts.concat(newProd),
                 availableProducts: state.availableProducts.concat(newProd)
             }
+            case SET_PRODUCTS:
+            
+                return {
+                    ...state,
+                    availableProducts: action.products,
+                    userProducts: action.products.filter(prod => prod.ownerId ==='u1')
+                }
         case UPDATE_PRODUCT:
             let productIndex = state.userProducts.findIndex( 
                 prod => prod.id === action.pid
